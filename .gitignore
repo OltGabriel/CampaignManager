@@ -1,4 +1,11 @@
 TimeSeries.md
 app/__pycache__/
 venv/
-app/data/
+app/data/audio/campaigns/*
+!app/data/audio/campaigns/.gitkeep
+app/data/audio/filler/*
+!app/data/audio/filler/.gitkeep
+app/data/video/campaigns/*
+!app/data/video/campaigns/.gitkeep
+app/data/video/filler/*
+!app/data/video/filler/.gitkeep
