@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Campanii Video</title>
+</head>
+<body style="margin:0; background:black; display:flex; align-items:center; justify-content:center; height:100vh;">
+    <video id="videoPlayer" width="100%" height="100%" autoplay muted></video>
+
+    <script>
+    const player = document.getElementById("videoPlayer");
+
+    async function loadVideo() {
+        const response = await fetch("/next-video");
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        player.src = url;
+        player.play();
+    }
+
+    player.addEventListener("ended", loadVideo);
+
+    // La început
+    loadVideo();
+    </script>
+</body>
+</html>
