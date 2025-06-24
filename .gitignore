@@ -1,6 +1,7 @@
 TimeSeries.md
 app/__pycache__/
 venv/
+wsl-env/
 app/data/audio/campaigns/*
 !app/data/audio/campaigns/.gitkeep
 app/data/audio/filler/*
