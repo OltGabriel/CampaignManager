@@ -1,7 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
-from fastapi.requests import Request
 from pathlib import Path
 import itertools
 import threading
@@ -11,51 +10,66 @@ import requests
 app = FastAPI()
 #ffff
 
-# Directoare media
-VIDEO_FILLER_DIR = Path(__file__).parent / "data" / "video" / "filler"
-AUDIO_FILLER_DIR = Path(__file__).parent / "data" / "audio" / "filler"
-VIDEO_CAMPAIGN_DIR = Path(__file__).parent / "data" / "video" / "campaigns"
-CAMPAIGN_JSON_PATH = Path(__file__).parent / "data" / "campaigns.json"
+# ==== Directoare și fișiere ====
+BASE_DIR = Path(__file__).parent
+VIDEO_FILLER_DIR = BASE_DIR / "data" / "video" / "filler"
+AUDIO_FILLER_DIR = BASE_DIR / "data" / "audio" / "filler"
+VIDEO_CAMPAIGN_DIR = BASE_DIR / "data" / "video" / "campaigns"
+CAMPAIGN_JSON_PATH = BASE_DIR / "data" / "campaigns.json"
 
-# Templates
-templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
+templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
+# ==== Variabile globale ====
+video_files = list(VIDEO_FILLER_DIR.glob("*.mp4"))
+video_cycle = itertools.cycle(video_files)
+current_video_path = None
+
+audio_files = list(AUDIO_FILLER_DIR.glob("*.mp3"))
+audio_cycle = itertools.cycle(audio_files)
+
+
+# ==== Pagina principală ====
 @app.get("/", response_class=HTMLResponse)
 def video_player(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-# ===== VIDEO (filler loop) =====
-video_files = list(VIDEO_FILLER_DIR.glob("*.mp4"))
-video_cycle = itertools.cycle(video_files)
 
+# ==== Obține următorul video ====
 @app.get("/next-video")
 def get_next_video():
-    global video_files, video_cycle
-    video_files = list(VIDEO_FILLER_DIR.glob("*.mp4"))
+    global current_video_path
     if not video_files:
-        return {"error": "No video files found."}
-    video_cycle = itertools.cycle(video_files)
-    return FileResponse(path=next(video_cycle), media_type="video/mp4")
+        return JSONResponse(content={"error": "No video files found."}, status_code=404)
+    current_video_path = next(video_cycle)
+    print(f"[NEXT] {current_video_path.name}")  # pentru debug
+    return FileResponse(path=current_video_path, media_type="video/mp4")
 
-# ===== AUDIO (filler loop) =====
-audio_files = list(AUDIO_FILLER_DIR.glob("*.mp3"))
-audio_cycle = itertools.cycle(audio_files)
 
+# ==== Obține ID-ul videoclipului curent ====
+@app.get("/api/current-video-id")
+def get_current_video_id():
+    global current_video_path
+    if not current_video_path:
+        return {"error": "No video is currently playing."}
+    return {"id": current_video_path.stem}
+
+
+# ==== Obține următoarea melodie audio ====
 @app.get("/audio")
 def get_next_audio():
     global audio_files, audio_cycle
-    audio_files = list(AUDIO_FILLER_DIR.glob("*.mp3"))
     if not audio_files:
-        return {"error": "No audio files found."}
-    audio_cycle = itertools.cycle(audio_files)
-    return FileResponse(path=next(audio_cycle), media_type="audio/mpeg")
+        return JSONResponse(content={"error": "No audio files found."}, status_code=404)
+    next_audio = next(audio_cycle)
+    return FileResponse(path=next_audio, media_type="audio/mpeg")
 
 
-# ===== UPDATE CAMPAIGNS =====
+# ==== Actualizare campanii și descărcare videoclipuri ====
 def download_video_thread(video_url: str, filename: str):
     try:
         response = requests.get(video_url, stream=True, timeout=60)
         response.raise_for_status()
+        VIDEO_CAMPAIGN_DIR.mkdir(parents=True, exist_ok=True)
         with open(VIDEO_CAMPAIGN_DIR / filename, "wb") as f:
             for chunk in response.iter_content(chunk_size=8192):
                 f.write(chunk)
@@ -63,22 +77,16 @@ def download_video_thread(video_url: str, filename: str):
     except Exception as e:
         print(f"[✗] Failed to download {filename}: {e}")
 
+
 @app.post("/api/update-schedule")
 async def update_schedule(new_schedule: dict):
     try:
-        # Scrie JSON-ul în fisier
         CAMPAIGN_JSON_PATH.write_text(json.dumps(new_schedule, indent=2), encoding='utf-8')
-
-        # Creează directoarele dacă nu există
-        VIDEO_CAMPAIGN_DIR.mkdir(parents=True, exist_ok=True)
-
-        # Descarcă fiecare video într-un thread separat
         for campaign in new_schedule.get("campaigns", []):
             video_url = campaign.get("video_url")
             video_file = campaign.get("video_file")
             if video_url and video_file:
                 threading.Thread(target=download_video_thread, args=(video_url, video_file)).start()
-
         return {"status": "ok", "message": "Schedule updated and download started"}
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})

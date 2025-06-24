@@ -7,8 +7,8 @@
       "video_file": "birra_moretti.mp4",
       "video_url": "https://appdemo.footprints-ai.com/contents/fileLoader/67a101453038314b3dec5aa7?type=video&orientation=landscape&playLoop=false&imagePlayTime=10&contentDuration=0",
       "constraints": {
-        "plays_per_hour": 10,
-        "plays_per_day": 100
+        "plays_per_hour": 30,
+        "plays_per_day": 200
       },
       "schedule": {
         "start_date": "2025-06-24",
