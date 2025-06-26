@@ -1,0 +1,193 @@
+body {
+    margin: 0;
+    background: black;
+    font-family: Arial, sans-serif;
+    color: white;
+}
+
+.video-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.controls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 100;
+}
+
+.info-panel {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 100;
+    background: rgba(0,0,0,0.7);
+    padding: 15px;
+    border-radius: 8px;
+    max-width: 300px;
+}
+
+.dashboard {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.8);
+    padding: 15px;
+    border-radius: 8px;
+    display: none;
+    max-height: 40vh;
+    overflow-y: auto;
+    z-index: 100;
+}
+
+button {
+    padding: 10px 15px;
+    background: #333;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 5px;
+}
+
+button:hover {
+    background: #555;
+}
+
+button:disabled {
+    background: #666;
+    cursor: not-allowed;
+}
+
+.campaign-item {
+    background: rgba(255,255,255,0.1);
+    margin: 5px 0;
+    padding: 10px;
+    border-radius: 4px;
+    border-left: 4px solid transparent;
+}
+
+.campaign-active {
+    border-left-color: #4CAF50;
+}
+
+.campaign-scheduled {
+    border-left-color: #FF9800;
+}
+
+.campaign-inactive {
+    border-left-color: #f44336;
+}
+
+.status-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.status-active { background: #4CAF50; }
+.status-scheduled { background: #FF9800; }
+.status-inactive { background: #f44336; }
+.status-campaign { background: #2196F3; }
+.status-filler { background: #9E9E9E; }
+
+.stats {
+    font-size: 12px;
+    color: #ccc;
+    margin-top: 5px;
+}
+
+.stats-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 2px 0;
+}
+
+#videoPlayer {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.toggle-btn {
+    background: #2196F3;
+}
+
+.refresh-btn {
+    background: #4CAF50;
+}
+
+.error-message {
+    color: #f44336;
+    background: rgba(244, 67, 54, 0.1);
+    padding: 10px;
+    border-radius: 4px;
+    margin: 10px 0;
+}
+
+.success-message {
+    color: #4CAF50;
+    background: rgba(76, 175, 80, 0.1);
+    padding: 10px;
+    border-radius: 4px;
+    margin: 10px 0;
+}
+
+.warning-message {
+    color: #FF9800;
+    background: rgba(255, 152, 0, 0.1);
+    padding: 10px;
+    border-radius: 4px;
+    margin: 10px 0;
+}
+
+.campaign-details {
+    font-size: 11px;
+    color: #aaa;
+    margin-top: 5px;
+}
+
+.no-video {
+    color: #f44336;
+    font-weight: bold;
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    font-size: 18px;
+}
+
+.schedule-item {
+    padding: 8px;
+    margin: 4px 0;
+    border-radius: 6px;
+    background-color: #2e2e2e;
+    color: #ccc;
+}
+
+.item-current {
+    background-color: #1565c0;
+    color: white;
+    font-weight: bold;
+    border-left: 4px solid #90caf9;
+}
+
+.item-past {
+    background-color: #444;
+    color: #888;
+}
+
+.item-future {
+    background-color: #2e7d32;
+    color: white;
+}

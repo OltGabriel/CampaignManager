@@ -1,0 +1,13 @@
+{
+  "file_type": "schedule",
+  "date": "26-06-2025",
+  "version": "0",
+  "relative": true,
+  "timezone": "Europe/Bucharest",
+  "playlist": [
+    {"at": "00:00:04", "id": "birra_moretti_2", "type":"campaign", "duration": 6},
+    {"at": "00:00:15", "id": "filler_1", "type":"filler", "duration": 27},
+    {"at": "00:01:00", "id": "filler_2", "type":"filler", "duration":  9},
+    {"at": "00:01:30", "id": "coretto", "type":"campaign", "duration": 10}
+  ]
+}
