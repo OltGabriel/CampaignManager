@@ -22,7 +22,7 @@ function showStatus(message, type = 'success') {
 // Load next video
 async function loadVideo(forceNext = false) {
     console.log("Loading next video...", forceNext ? "(forced next)" : "");
-    nextButton.disabled = true;
+    if (nextButton) nextButton.disabled = true;
 
     const placeholderImage = document.getElementById("placeholderImage");
 
@@ -99,7 +99,10 @@ async function loadVideo(forceNext = false) {
             placeholderImage.src = blobUrl;
             placeholderImage.style.display = "block";
 
-            showStatus("Showing placeholder (no scheduled content)", 'warning');
+            setTimeout(() => {
+                console.log("Rechecking scheduled content after placeholder...");
+                loadVideo(false);
+            }, 1000);
         } else {
             throw new Error("Unsupported content type: " + contentType);
         }
@@ -116,7 +119,7 @@ async function loadVideo(forceNext = false) {
         }
     }
 
-    nextButton.disabled = false;
+    if (nextButton) nextButton.disabled = false;
 }
 
 
