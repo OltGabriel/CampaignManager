@@ -2,6 +2,7 @@ from fastapi import Request
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from datetime import datetime
 from typing import Dict
+import json
 
 from core import (
     BASE_DIR,
@@ -9,14 +10,45 @@ from core import (
     campaign_plays_today,
     campaign_plays_hour,
     last_served_video,
-    logger
+    logger,
+    CAMPAIGN_JSON_PATH,
+    SCHEDULE_JSON_PATH
 )
 from services import ScheduleManager, VideoService
 
-
 def setup_routes(app, schedule_manager: ScheduleManager, video_service: VideoService):
     """Setup all API routes"""
+
+    # ==== Update la Campanii ====
+    @app.post("/api/update-campaigns")
+    async def update_campaigns(request: Request):
+        """Upload a new campaigns.json (overwrite)"""
+        try:
+            data = await request.json()
+            # TODO LOG THE NEW CAMPAIGN DATA
+            with open(CAMPAIGN_JSON_PATH, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+            # Reload campaigns and (optionally) schedule
+            schedule_manager.load_campaigns()
+            schedule_manager.load_schedule()  # for safety, reload schedule (can be skipped if not needed)
+            return {"status": "ok", "message": "campaigns.json updated and reloaded"}
+        except Exception as e:
+            return JSONResponse(status_code=500, content={"error": str(e)})
     
+    # ==== Update la Schedule ====
+    @app.post("/api/update-schedule")
+    async def update_schedule(request: Request):
+        """Upload a new schedule.json (overwrite)"""
+        try:
+            data = await request.json()
+            # TODO LOG THE NEW SCHEDULE DATA
+            with open(SCHEDULE_JSON_PATH, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+            schedule_manager.load_schedule()
+            return {"status": "ok", "message": "schedule.json updated and reloaded"}
+        except Exception as e:
+            return JSONResponse(status_code=500, content={"error": str(e)})
+
     # ==== Pagina principală ====
     @app.get("/", response_class=HTMLResponse)
     def video_player(request: Request):

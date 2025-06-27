@@ -1,17 +1,39 @@
 {
   "file_type": "schedule",
-  "date": "26-06-2025",
+  "date": "27-06-2025",
   "version": "0",
-  "relative": true,
+  "relative": false,
   "timezone": "Europe/Bucharest",
   "playlist": [
-    {"at": "00:00:03", "id": "birra_moretti_1", "type":"campaign", "duration": 6},
-    {"at": "00:00:05", "id": "filler_1", "type":"filler", "duration": 27},
-    {"at": "00:00:45", "id": "coretto", "type":"campaign", "duration": 10},
-    {"at": "00:01:00", "id": "filler_3", "type":"filler", "duration":  9},
-    {"at": "00:01:30", "id": "birra_moretti_2", "type":"campaign", "duration": 6},
-    {"at": "00:01:45", "id": "birra_moretti_1", "type":"campaign", "duration": 6},
-    {"at": "00:11:00", "id": "birra_moretti_2", "type":"campaign", "duration": 6},
-    {"at": "00:11:00", "id": "coretto", "type":"campaign", "duration": 10}
+    {
+      "at": "14:27:00",
+      "id": "birra_moretti_1",
+      "type": "campaign",
+      "duration": 6
+    },
+    {
+      "at": "14:28:00",
+      "id": "filler_1",
+      "type": "filler",
+      "duration": 27
+    },
+    {
+      "at": "14:28:30",
+      "id": "coretto",
+      "type": "campaign",
+      "duration": 10
+    },
+    {
+      "at": "14:29:30",
+      "id": "missing_file",
+      "type": "filler",
+      "duration": 9
+    },
+    {
+      "at": "14:30:30",
+      "id": "filler_3",
+      "type": "filler",
+      "duration": 9
+    }
   ]
 }

@@ -54,9 +54,9 @@
       "version": "0",
       "file_type": "campaign",
       "name": "Birra Moretti Promo Iunie",
-      "video_file": "birra_moretti1.mp4",
+      "video_file": "birra_moretti.mp4",
       "video_url": "blob:https://demoplayer.footprints-ai.com/39a1c428-bf0c-4722-b40f-ab6045c92a61",
-      "audio_file": "birra_moretti1.mp3",
+      "audio_file": "birra_moretti.mp3",
       "audio_url": "",
       "constraints": {
         "plays_per_hour": 30
@@ -77,13 +77,13 @@
       "id": "coretto",
       "version": "0",
       "file_type": "campaign",
-      "name": "Birra Moretti Promo Iunie",
+      "name": "Coretto Coffee",
       "video_file": "coretto.mp4",
       "video_url": "https://appdemo.footprints-ai.com/contents/fileLoader/67a101453038314b3dec5aa7?type=video&orientation=landscape&playLoop=false&imagePlayTime=10&contentDuration=0",
       "audio_file": "",
       "audio_url": "",
       "constraints": {
-        "plays_per_hour": 60
+        "plays_per_hour": 20
       },
       "schedule": {
         "start_date": "20-06-2025",
