@@ -49,17 +49,15 @@ def setup_routes(app, schedule_manager: ScheduleManager, video_service: VideoSer
         
         return video_info
 
+
     @app.get("/api/schedule-status")
     def get_schedule_status():
-        """Get current schedule status and all playlist items"""
         schedule_manager.load_schedule()
         schedule_manager.load_campaigns()
-        
+
         current_time = datetime.now()
-        schedule_date = schedule_manager.schedule.get('date', 'N/A')
         is_valid_today = schedule_manager.is_schedule_for_today()
-        
-        # Get current scheduled item
+
         current_scheduled = schedule_manager.get_current_scheduled_item()
         current_item_info = None
         if current_scheduled:
@@ -71,14 +69,20 @@ def setup_routes(app, schedule_manager: ScheduleManager, video_service: VideoSer
                 "duration": scheduled_item.get('duration'),
                 "name": campaign_info.get('name') if campaign_info else scheduled_item.get('id')
             }
-        
-        # Get all playlist items with status
+
         playlist_items = schedule_manager.get_all_playlist_items()
-        
+
+        # NEW: Time since start in seconds
+        time_since_start = None
+        if schedule_manager.start_time:
+            delta = datetime.now() - schedule_manager.start_time
+            time_since_start = int(delta.total_seconds())
+
         return {
-            "schedule_date": schedule_date,
+            "schedule_date": schedule_manager.schedule.get('date', 'N/A'),
             "is_valid_for_today": is_valid_today,
             "current_time": current_time.strftime('%H:%M:%S'),
+            "time_since_start_seconds": time_since_start,
             "current_scheduled_item": current_item_info,
             "playlist": playlist_items,
             "total_playlist_items": len(playlist_items),
@@ -91,6 +95,7 @@ def setup_routes(app, schedule_manager: ScheduleManager, video_service: VideoSer
                 "scheduled": last_served_video.get("info", {}).get("scheduled", False) if last_served_video else False
             } if last_served_video else None
         }
+
 
     # ==== Campaign status endpoint ====
     @app.get("/api/campaign-status")

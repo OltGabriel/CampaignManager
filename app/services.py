@@ -74,6 +74,9 @@ class ScheduleManager:
     
     # ScheduleManager  – acceptă și YYYY-MM-DD
     def is_schedule_for_today(self) -> bool:
+        # if it's relative, we assume it's always for today
+        if self.schedule.get("relative", False):
+            return True
         if 'date' not in self.schedule:
             return False
         date_str = self.schedule['date']

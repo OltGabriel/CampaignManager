@@ -2,6 +2,8 @@ const player = document.getElementById("videoPlayer");
 const nextButton = document.getElementById("nextButton");
 const dashboard = document.getElementById("dashboard");
 
+let uptimeSeconds = null;
+let uptimeInterval = null;
 let dashboardVisible = false;
 let statusUpdateInterval;
 let currentVideoInfo = null;
@@ -194,6 +196,13 @@ async function updateVideoInfo() {
 }
 
 // Update campaign status
+const secondsToHMS = (seconds) => {
+    const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+    const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+    const s = (seconds % 60).toString().padStart(2, '0');
+    return `${h}:${m}:${s}`;
+};
+
 async function updateCampaignStatus() {
     try {
         const response = await fetch("/api/campaign-status");
@@ -204,18 +213,34 @@ async function updateCampaignStatus() {
         document.getElementById("currentTime").textContent = time;
 
         // Update active campaigns count
-        const activeCampaigns = data.total_campaigns || 0;
-        document.getElementById("activeCampaigns").textContent = activeCampaigns;
+        document.getElementById("activeCampaigns").textContent = data.total_campaigns || 0;
 
-        // remove call to nonexistent updateCampaignDashboard()
-        // updateCampaignDashboard(data.campaigns);
+        // Update uptime
+        const statusRes = await fetch("/api/schedule-status");
+        const statusData = await statusRes.json();
+        if (statusData.time_since_start_seconds != null) {
+            uptimeSeconds = statusData.time_since_start_seconds;
+            document.getElementById("uptime").textContent = secondsToHMS(uptimeSeconds);
+
+            if (!uptimeInterval) {
+                uptimeInterval = setInterval(() => {
+                    uptimeSeconds++;
+                    document.getElementById("uptime").textContent = secondsToHMS(uptimeSeconds);
+                }, 1000);
+            }
+        } else {
+            document.getElementById("uptime").textContent = "N/A";
+        }
+
 
     } catch (err) {
         console.error("Failed to fetch campaign status:", err);
         document.getElementById("activeCampaigns").textContent = "error";
+        document.getElementById("uptime").textContent = "error";
         showStatus("Failed to get campaign status: " + err.message, 'error');
     }
 }
+
 
 
 // Update campaign dashboard
@@ -356,7 +381,10 @@ window.addEventListener('load', () => {
 // Cleanup on page unload
 window.addEventListener('beforeunload', () => {
     if (statusUpdateInterval) {
-        clearInterval(statusUpdateInterval);
+         clearInterval(statusUpdateInterval);
+    }
+    if (uptimeInterval) {
+        clearInterval(uptimeInterval);
     }
     
     // Clean up blob URLs
