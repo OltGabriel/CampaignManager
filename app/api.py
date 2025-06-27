@@ -12,7 +12,8 @@ from core import (
     last_served_video,
     logger,
     CAMPAIGN_JSON_PATH,
-    SCHEDULE_JSON_PATH
+    SCHEDULE_JSON_PATH,
+    CONFIG_PATH
 )
 from services import ScheduleManager, VideoService
 
@@ -50,9 +51,31 @@ def setup_routes(app, schedule_manager: ScheduleManager, video_service: VideoSer
             return JSONResponse(status_code=500, content={"error": str(e)})
 
     # ==== Pagina principală ====
-    @app.get("/", response_class=HTMLResponse)
+    @app.get("/video", response_class=HTMLResponse)
     def video_player(request: Request):
-        return FileResponse(str(BASE_DIR / "templates" / "index.html"))
+        return FileResponse(str(BASE_DIR / "templates" / "video.html"))
+    
+    @app.get("/", response_class=HTMLResponse)
+    def setup_enviroment(request: Request):
+        return FileResponse(str(BASE_DIR / "templates" / "setup.html"))
+    
+    # === Setup Device ===
+    @app.post("/api/device/setup")
+    async def device_setup(request: Request):
+        try:
+            data = await request.json()
+
+            # Validare minimală
+            required_keys = {"device_name", "location_id", "stream_type"}
+            if not required_keys.issubset(data.keys()):
+                return JSONResponse(status_code=400, content={"error": "Missing required fields"})
+
+            with open(CONFIG_PATH, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+
+            return {"status": "ok", "message": "Config saved"}
+        except Exception as e:
+            return JSONResponse(status_code=500, content={"error": str(e)})
 
     # ==== Obține următorul video ====
     @app.get("/next-video")

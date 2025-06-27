@@ -16,6 +16,7 @@ AUDIO_CAMPAIGN_DIR = BASE_DIR / "data" / "audio" / "campaigns"
 CAMPAIGN_JSON_PATH = BASE_DIR / "data" / "campaigns.json"
 SCHEDULE_JSON_PATH = BASE_DIR / "data" / "schedule.json"
 PLACEHOLDER_IMAGE_PATH = BASE_DIR / "data" / "placeholder.png"
+CONFIG_PATH = BASE_DIR / "config.json"
 
 # ==== Variabile globale ====
 video_files = []

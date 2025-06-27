@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Device Setup</title>
+  <link rel="stylesheet" href="/static/css/setup_style.css">
+</head>
+<body>
+  <div class="setup-container">
+    <h2>Configure Device</h2>
+    <form id="deviceSetupForm">
+    <input type="text" name="device_name" placeholder="Device Name" required>
+    <input type="number" name="location_id" placeholder="Location ID" required>
+    <select name="stream_type" required>
+        <option value="video">Video</option>
+        <option value="audio">Audio</option>
+    </select>
+    <button type="submit">Save Config</button>
+    </form>
+    <div id="statusMsg"></div>
+
+  </div>
+
+  <script src="/static/js/setup.js"></script>
+</body>
+</html>
