@@ -50,6 +50,30 @@
       }
     },
     {
+      "id": "birra_moretti_1",
+      "version": "0",
+      "file_type": "campaign",
+      "name": "Birra Moretti Promo Iunie",
+      "video_file": "birra_moretti1.mp4",
+      "video_url": "blob:https://demoplayer.footprints-ai.com/39a1c428-bf0c-4722-b40f-ab6045c92a61",
+      "audio_file": "birra_moretti1.mp3",
+      "audio_url": "",
+      "constraints": {
+        "plays_per_hour": 30
+      },
+      "schedule": {
+        "start_date": "24-06-2025",
+        "end_date": "30-07-2025",
+        "days_of_week": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday"
+        ]
+      }
+    },
+    {
       "id": "coretto",
       "version": "0",
       "file_type": "campaign",

@@ -5,11 +5,12 @@
   "relative": true,
   "timezone": "Europe/Bucharest",
   "playlist": [
-    {"at": "00:00:04", "id": "birra_moretti_2", "type":"campaign", "duration": 6},
+    {"at": "00:00:03", "id": "birra_moretti_1", "type":"campaign", "duration": 6},
     {"at": "00:00:05", "id": "filler_1", "type":"filler", "duration": 27},
+    {"at": "00:00:45", "id": "coretto", "type":"campaign", "duration": 10},
     {"at": "00:01:00", "id": "filler_3", "type":"filler", "duration":  9},
-    {"at": "00:01:30", "id": "coretto", "type":"campaign", "duration": 10},
-    {"at": "00:06:00", "id": "birra_moretti_2", "type":"campaign", "duration": 6},
+    {"at": "00:01:30", "id": "birra_moretti_2", "type":"campaign", "duration": 6},
+    {"at": "00:01:45", "id": "birra_moretti_1", "type":"campaign", "duration": 6},
     {"at": "00:11:00", "id": "birra_moretti_2", "type":"campaign", "duration": 6},
     {"at": "00:11:00", "id": "coretto", "type":"campaign", "duration": 10}
   ]
