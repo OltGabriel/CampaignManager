@@ -10,3 +10,5 @@ app/data/video/campaigns/*
 !app/data/video/campaigns/.gitkeep
 app/data/video/filler/*
 !app/data/video/filler/.gitkeep
+app/config.json
+.vscode/

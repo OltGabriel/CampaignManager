@@ -43,11 +43,6 @@ def hash_api_key(api_key: str) -> str:
     return hashlib.sha256(api_key.encode('utf-8')).hexdigest()
 
 
-def load_device_config():
-    # Use the validated config loader
-    return load_config()
-
-
 def save_device_config(cfg):
     # Remove 'mode' if present, always use 'stream_type'
     if 'mode' in cfg:
@@ -57,7 +52,7 @@ def save_device_config(cfg):
 
 
 def require_api_key(x_api_key: str = Header(...)):
-    config = load_device_config()
+    config = load_config()
     stored_hash = config.get('api_key_hash')
     if not stored_hash:
         return False

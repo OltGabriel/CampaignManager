@@ -21,8 +21,7 @@ from core import (
     DEVICE_CONFIG_PATH,
     HEARTBEAT_PATH,
     hash_api_key,
-    load_device_config,
-    save_device_config,
+    load_config,
     require_api_key
 )
 from services import ScheduleManager, VideoService
@@ -31,7 +30,7 @@ def setup_routes(app, schedule_manager: ScheduleManager, video_service: VideoSer
     # === Device Configured Status Endpoint ===
     @app.get("/api/device/configured")
     def device_configured():
-        config = load_device_config()
+        config = load_config()
         required = {"device_name", "location_id", "stream_type"}
         is_configured = all(k in config and config[k] for k in required)
         stream_type = config.get("stream_type")
@@ -51,11 +50,11 @@ def setup_routes(app, schedule_manager: ScheduleManager, video_service: VideoSer
         if not api_key:
             return JSONResponse(status_code=400, content={"error": "API key required"})
         # Hash and store API key
-        config = load_device_config()
+        config = load_config()
         config['stream_type'] = stream_type
         config['device_name'] = device_name
         config['api_key_hash'] = hash_api_key(api_key)
-        save_device_config(config)
+        load_config(config)
         return {"status": "ok", "message": f"Device initialized as {stream_type}", "device_name": device_name}
 
     # === Heartbeat Endpoint ===
@@ -63,7 +62,7 @@ def setup_routes(app, schedule_manager: ScheduleManager, video_service: VideoSer
     async def device_heartbeat(request: Request, x_api_key: str = Header(...)):
         if not require_api_key(x_api_key):
             return JSONResponse(status_code=401, content={"error": "Invalid API key"})
-        config = load_device_config()
+        config = load_config()
         device_name = config.get('device_name', 'Unknown')
         now = int(time.time())
         # Save heartbeat info
@@ -120,7 +119,7 @@ def setup_routes(app, schedule_manager: ScheduleManager, video_service: VideoSer
         # ensure the config is loaded``
         current_config  = {}
         try:
-            current_config  = load_device_config()
+            current_config  = load_config()
         except Exception as e:
             logger.error(f"Failed to load config: {e}")
             return JSONResponse(status_code=500, content={"error": "Configuration error"})

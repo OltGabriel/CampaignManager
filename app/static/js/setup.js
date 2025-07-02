@@ -1,23 +1,6 @@
 console.log("setup.js loaded");
 console.log("deviceSetupForm:", document.getElementById("deviceSetupForm"));
 
-// On page load, check if device is already configured
-// window.addEventListener("DOMContentLoaded", async function () {
-//     try {
-//         const res = await fetch("/api/device/configured");
-//         if (res.ok) {
-//             const result = await res.json();
-//             if (result.configured) {
-//                 // Always redirect to video stream
-//                 window.location.href = "/video";
-//                 return;
-//             }
-//         }
-//     } catch (err) {
-//         // Ignore errors, allow setup to proceed
-//     }
-// });
-
 document.getElementById("deviceSetupForm").addEventListener("submit", async function (e) {
     e.preventDefault();
 
