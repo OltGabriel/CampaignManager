@@ -12,3 +12,4 @@ app/data/video/filler/*
 !app/data/video/filler/.gitkeep
 app/config.json
 .vscode/
+app/data/heartbeat.json
