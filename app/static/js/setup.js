@@ -2,21 +2,21 @@ console.log("setup.js loaded");
 console.log("deviceSetupForm:", document.getElementById("deviceSetupForm"));
 
 // On page load, check if device is already configured
-window.addEventListener("DOMContentLoaded", async function () {
-    try {
-        const res = await fetch("/api/device/configured");
-        if (res.ok) {
-            const result = await res.json();
-            if (result.configured) {
-                // Always redirect to video stream
-                window.location.href = "/video";
-                return;
-            }
-        }
-    } catch (err) {
-        // Ignore errors, allow setup to proceed
-    }
-});
+// window.addEventListener("DOMContentLoaded", async function () {
+//     try {
+//         const res = await fetch("/api/device/configured");
+//         if (res.ok) {
+//             const result = await res.json();
+//             if (result.configured) {
+//                 // Always redirect to video stream
+//                 window.location.href = "/video";
+//                 return;
+//             }
+//         }
+//     } catch (err) {
+//         // Ignore errors, allow setup to proceed
+//     }
+// });
 
 document.getElementById("deviceSetupForm").addEventListener("submit", async function (e) {
     e.preventDefault();
@@ -41,8 +41,12 @@ document.getElementById("deviceSetupForm").addEventListener("submit", async func
         console.log("setup: status", res.status, "type", res.type, "body", result);
         if (res.ok) {
             document.getElementById("statusMsg").textContent = "✅ Config saved! Redirecting...";
-            console.log("Redirecting to /video now...");
-            window.location.href = "/video";
+            console.log("Redirecting based on stream_type...");
+            if (data.stream_type === "audio") {
+                window.location.href = "/audio";
+            } else {
+                window.location.href = "/video";
+            }
         } else {
             document.getElementById("statusMsg").textContent = "❌ Error: " + result.error;
         }

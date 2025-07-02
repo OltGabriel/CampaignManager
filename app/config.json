@@ -1,7 +1,5 @@
 {
   "device_name": "device1",
-  "location_id": 6531464,
-  "stream_type": "video",
-  "mode": "video",
-  "api_key_hash": "2afe16a6d630d94cd07c68d5e35568655bf5f60bef29c4f1321fc857816afec9"
+  "location_id": 546,
+  "stream_type": "audio"
 }

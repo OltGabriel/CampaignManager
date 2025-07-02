@@ -1,11 +1,73 @@
+# --- Config validation and loading ---
+def validate_config(config: dict) -> bool:
+    """Validate the loaded configuration"""
+    required_fields = ["stream_type", "device_name", "location_id"]
+    for field in required_fields:
+        if field not in config:
+            logger.error(f"Missing required config field: {field}")
+            return False
+    return True
+
+def load_config():
+    """Load configuration from config.json if it exists"""
+    global config
+    if config is not None and config != {}:
+        return config
+    if CONFIG_PATH.exists():
+        try:
+            with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+                config = json.load(f)
+            logger.info("Loaded configuration from config.json")
+            if not validate_config(config):
+                logger.error("Invalid configuration. Some required fields are missing.")
+                config = {}
+        except Exception as e:
+            logger.error(f"Failed to load config.json: {e}")
+            config = {}
+    else:
+        logger.warning("No config.json found; using defaults")
+        config = {}
+    return config
+# === Device config and API key helpers (moved from api.py) ===
+import hashlib
+import time
+from fastapi import Header
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 from datetime import datetime
 import logging
+import json
+
+
+def hash_api_key(api_key: str) -> str:
+    return hashlib.sha256(api_key.encode('utf-8')).hexdigest()
+
+
+def load_device_config():
+    # Use the validated config loader
+    return load_config()
+
+
+def save_device_config(cfg):
+    # Remove 'mode' if present, always use 'stream_type'
+    if 'mode' in cfg:
+        cfg['stream_type'] = cfg.pop('mode')
+    with open(DEVICE_CONFIG_PATH, 'w', encoding='utf-8') as f:
+        json.dump(cfg, f, indent=2, ensure_ascii=False)
+
+
+def require_api_key(x_api_key: str = Header(...)):
+    config = load_device_config()
+    stored_hash = config.get('api_key_hash')
+    if not stored_hash:
+        return False
+    return hash_api_key(x_api_key) == stored_hash
+config: dict = {}
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 # ==== Directoare și fișiere ====
 BASE_DIR = Path(__file__).parent
@@ -17,6 +79,8 @@ CAMPAIGN_JSON_PATH = BASE_DIR / "data" / "campaigns.json"
 SCHEDULE_JSON_PATH = BASE_DIR / "data" / "schedule.json"
 PLACEHOLDER_IMAGE_PATH = BASE_DIR / "data" / "placeholder.png"
 CONFIG_PATH = BASE_DIR / "config.json"
+DEVICE_CONFIG_PATH = CONFIG_PATH
+HEARTBEAT_PATH = BASE_DIR / "data" / "heartbeat.json"
 
 # ==== Variabile globale ====
 video_files = []
