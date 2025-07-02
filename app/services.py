@@ -5,8 +5,6 @@ from pathlib import Path
 
 from core import (
     logger,
-    current_video_path,
-    current_video_type,
     CAMPAIGN_JSON_PATH,
     SCHEDULE_JSON_PATH,
     VIDEO_CAMPAIGN_DIR,
@@ -15,9 +13,7 @@ from core import (
     campaign_plays_today,
     campaign_plays_hour,
     reset_hourly_counters,
-    reset_daily_counters,
-    current_video_index,
-    last_served_video
+    reset_daily_counters
 )
 
 
@@ -221,11 +217,13 @@ class ScheduleManager:
 class VideoService:
     def __init__(self, schedule_manager: ScheduleManager):
         self.schedule_manager = schedule_manager
-    
+        self.current_video_path = None
+        self.current_video_type = None
+        self.last_served_video = None
+        self.current_video_index = 0
+
     def get_next_video(self):
         """Get the next video based on schedule and availability"""
-        global current_video_path, current_video_type, last_served_video, current_video_index
-
         reset_hourly_counters()
         reset_daily_counters()
 
@@ -236,15 +234,15 @@ class VideoService:
             item_type = scheduled_item.get('type', 'filler')
             item_id = scheduled_item.get('id')
 
-            # === CAMPAGN VIDEO ===
+            # === CAMPAIGN VIDEO ===
             if item_type == 'campaign' and campaign_info:
                 video_file = campaign_info.get('video_file')
                 if video_file:
                     video_path = VIDEO_CAMPAIGN_DIR / video_file
                     if video_path.exists():
-                        current_video_path = video_path
-                        current_video_type = 'campaign'
-                        last_served_video = {
+                        self.current_video_path = video_path
+                        self.current_video_type = 'campaign'
+                        self.last_served_video = {
                             "path": video_path,
                             "type": 'campaign',
                             "info": campaign_info
@@ -255,8 +253,8 @@ class VideoService:
                             campaign_plays_hour[campaign_id] = campaign_plays_hour.get(campaign_id, 0) + 1
                             campaign_plays_today[campaign_id] = campaign_plays_today.get(campaign_id, 0) + 1
 
-                        logger.info(f"[SCHEDULED-CAMPAIGN] {current_video_path.name}")
-                        return current_video_path, 'campaign'
+                        logger.info(f"[SCHEDULED-CAMPAIGN] {self.current_video_path.name}")
+                        return self.current_video_path, 'campaign'
                     else:
                         logger.warning(f"[MISSING-CAMPAIGN] Video not found: {video_file} → using placeholder")
                         return self._serve_placeholder(f"Missing campaign video: {video_file}")
@@ -267,40 +265,40 @@ class VideoService:
 
                 for filler_file in filler_files:
                     if filler_file.stem == item_id or filler_file.name == f"{item_id}.mp4":
-                        current_video_path = filler_file
-                        current_video_type = 'filler'
-                        last_served_video = {
+                        self.current_video_path = filler_file
+                        self.current_video_type = 'filler'
+                        self.last_served_video = {
                             "path": filler_file,
                             "type": 'filler',
                             "info": {'id': item_id, 'scheduled': True}
                         }
-                        logger.info(f"[SCHEDULED-FILLER] {current_video_path.name}")
-                        return current_video_path, 'filler'
+                        logger.info(f"[SCHEDULED-FILLER] {self.current_video_path.name}")
+                        return self.current_video_path, 'filler'
 
-                # Filler lipsă: încearcă orice alt filler
+                # Filler missing: try any other filler
                 if filler_files:
-                    filler_file = filler_files[current_video_index % len(filler_files)]
-                    current_video_index = (current_video_index + 1) % len(filler_files)
-                    current_video_path = filler_file
-                    current_video_type = 'filler'
-                    last_served_video = {
+                    filler_file = filler_files[self.current_video_index % len(filler_files)]
+                    self.current_video_index = (self.current_video_index + 1) % len(filler_files)
+                    self.current_video_path = filler_file
+                    self.current_video_type = 'filler'
+                    self.last_served_video = {
                         "path": filler_file,
                         "type": 'filler',
                         "info": {'scheduled': False, 'fallback': True, 'message': f"Missing filler: {item_id}.mp4"}
                     }
                     logger.warning(f"[FILLER-FALLBACK] {item_id}.mp4 missing → using {filler_file.name}")
-                    return current_video_path, 'filler'
+                    return self.current_video_path, 'filler'
                 else:
                     logger.warning(f"[NO-FILLERS] Filler '{item_id}' not found and no fillers available → placeholder")
                     return self._serve_placeholder(f"Missing filler and no alternatives: {item_id}.mp4")
 
         # No scheduled item – fallback
         return self._serve_placeholder("No scheduled content at this time")
-    
+
     def _serve_placeholder(self, message="No content available"):
         if PLACEHOLDER_IMAGE_PATH.exists():
-            current_video_type = "placeholder"
-            last_served_video = {
+            self.current_video_type = "placeholder"
+            self.last_served_video = {
                 "path": PLACEHOLDER_IMAGE_PATH,
                 "type": "placeholder",
                 "info": {"message": message}
@@ -311,20 +309,16 @@ class VideoService:
             logger.error("[FATAL] No placeholder image found")
             return None, 'error'
 
-
-    
     def get_current_video_info(self):
         """Get information about the currently served video"""
-        global last_served_video
-        
         # Check if we have a last served video
-        if not last_served_video or not last_served_video.get("path"):
+        if not self.last_served_video or not self.last_served_video.get("path"):
             return None
-        
-        file_path = last_served_video["path"]
-        content_type = last_served_video["type"]
-        info = last_served_video.get("info", {})
-        
+
+        file_path = self.last_served_video["path"]
+        content_type = self.last_served_video["type"]
+        info = self.last_served_video.get("info", {})
+
         response_data = {
             "id": file_path.stem if hasattr(file_path, 'stem') else str(file_path).split('/')[-1].split('.')[0],
             "type": content_type,
@@ -333,12 +327,12 @@ class VideoService:
             "scheduled": info.get("scheduled", False),
             "fallback": info.get("fallback", False)
         }
-        
+
         # Add campaign info if it's a campaign video
         if content_type == "campaign" and info:
             response_data["campaign_name"] = info.get("name", "Unknown Campaign")
             response_data["campaign_id"] = info.get("id", "unknown")
         elif content_type == "placeholder":
             response_data["message"] = info.get("message", "Placeholder content")
-        
+
         return response_data

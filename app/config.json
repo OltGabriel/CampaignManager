@@ -1,5 +1,7 @@
 {
-  "device_name": "RPI5_v2",
-  "location_id": 13141515,
-  "stream_type": "audio"
+  "device_name": "device1",
+  "location_id": 6531464,
+  "stream_type": "video",
+  "mode": "video",
+  "api_key_hash": "2afe16a6d630d94cd07c68d5e35568655bf5f60bef29c4f1321fc857816afec9"
 }

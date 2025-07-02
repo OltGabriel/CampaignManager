@@ -3,6 +3,10 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from datetime import datetime
 from typing import Dict
 import json
+import hashlib
+import time
+from fastapi import Header
+from pathlib import Path
 
 from core import (
     BASE_DIR,
@@ -18,6 +22,74 @@ from core import (
 from services import ScheduleManager, VideoService
 
 def setup_routes(app, schedule_manager: ScheduleManager, video_service: VideoService):
+    # === Device Configured Status Endpoint ===
+    @app.get("/api/device/configured")
+    def device_configured():
+        config = load_device_config()
+        required = {"device_name", "location_id", "stream_type"}
+        is_configured = all(k in config and config[k] for k in required)
+        stream_type = config.get("stream_type") or config.get("mode")
+        return {"configured": is_configured, "stream_type": stream_type}
+
+    DEVICE_CONFIG_PATH = CONFIG_PATH
+    HEARTBEAT_PATH = BASE_DIR / "data" / "heartbeat.json"
+
+    # Helper: Hash API key
+    def hash_api_key(api_key: str) -> str:
+        return hashlib.sha256(api_key.encode('utf-8')).hexdigest()
+
+    # Helper: Load config
+    def load_device_config():
+        if Path(DEVICE_CONFIG_PATH).exists():
+            with open(DEVICE_CONFIG_PATH, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        return {}
+
+    # Helper: Save config
+    def save_device_config(cfg):
+        with open(DEVICE_CONFIG_PATH, 'w', encoding='utf-8') as f:
+            json.dump(cfg, f, indent=2, ensure_ascii=False)
+
+    # Helper: Check API key
+    def require_api_key(x_api_key: str = Header(...)):
+        config = load_device_config()
+        stored_hash = config.get('api_key_hash')
+        if not stored_hash:
+            return False
+        return hash_api_key(x_api_key) == stored_hash
+
+    # === Device Initialization Endpoint ===
+    @app.post("/api/device/init")
+    async def device_init(request: Request):
+        data = await request.json()
+        mode = data.get('mode')  # 'audio' or 'video'
+        api_key = data.get('api_key')
+        device_name = data.get('device_name', 'Unknown')
+        if mode not in ('audio', 'video'):
+            return JSONResponse(status_code=400, content={"error": "Mode must be 'audio' or 'video'"})
+        if not api_key:
+            return JSONResponse(status_code=400, content={"error": "API key required"})
+        # Hash and store API key
+        config = load_device_config()
+        config['mode'] = mode
+        config['device_name'] = device_name
+        config['api_key_hash'] = hash_api_key(api_key)
+        save_device_config(config)
+        return {"status": "ok", "message": f"Device initialized as {mode}", "device_name": device_name}
+
+    # === Heartbeat Endpoint ===
+    @app.post("/api/device/heartbeat")
+    async def device_heartbeat(request: Request, x_api_key: str = Header(...)):
+        if not require_api_key(x_api_key):
+            return JSONResponse(status_code=401, content={"error": "Invalid API key"})
+        config = load_device_config()
+        device_name = config.get('device_name', 'Unknown')
+        now = int(time.time())
+        # Save heartbeat info
+        heartbeat_info = {"device_name": device_name, "last_seen": now}
+        with open(HEARTBEAT_PATH, 'w', encoding='utf-8') as f:
+            json.dump(heartbeat_info, f, indent=2)
+        return {"status": "ok", "last_seen": now}
     """Setup all API routes"""
 
     # ==== Update la Campanii ====
